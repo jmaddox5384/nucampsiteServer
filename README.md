@@ -1,1 +1,2 @@
 # nucampsiteServer
+# basic-auth
