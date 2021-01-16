@@ -16,7 +16,7 @@ partnerRouter.route('/')
     .catch(err => next (err));
 })
 
-.post(authenticate.verifyUser,(req, res, next) => {
+.post(authenticate.verifyUser,authenticate.verifyAdmin, (req, res, next) => {
     Partner.create(req.body)
     .then(partner => {
         console.log('Campsite Created ', partner);
@@ -32,7 +32,7 @@ partnerRouter.route('/')
     res.end('PUT operation not supported on /partners');
 })
 
-.delete(authenticate.verifyUser,(req, res, next) => {
+.delete(authenticate.verifyAdmin,(req, res, next) => {
     Partner.deleteMany()
     .then(response => {
         res.statusCode = 200;
