@@ -1,6 +1,7 @@
 const express = require('express');
 const Campsite = require('../models/campsite');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 
 
@@ -37,7 +38,7 @@ campsiteRouter.route('/')
     res.end('PUT operation not supported on /campsites');
 })
 
-.delete(authenticate.verifyUse, authenticate.verifyAdmin, (req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
     Campsite.deleteMany()
     .then(response => {
         res.statusCode = 200;
@@ -181,6 +182,8 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
+            let targetCampsite = campsite.comments.id(req.user._id.commentId);
+            if (targetCampsite.author.toString() == req.user._idtoString()) {
             if (req.body.rating) {
                 campsite.comments.id(req.params.commentId).rating = req.body.rating;
             }
@@ -203,6 +206,7 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
             err.status = 404;
             return next(err);
         }
+      }
     })
     .catch(err => next(err));
 })
@@ -210,8 +214,8 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
     Campsite.findById(req.params.campsiteId)
     .then(campsite => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
-            let targetCampsite = campsite.comments.id(req.user._id.commentId);
-            if (targetCampsite.author.toString() == req.user._idtoString()) {
+            let targetComment = campsite.comments.id(req.params.commentId);
+            if(targetComment.author.toString() == req.user._id.toString()) {
             campsite.comments.id(req.params.commentId).remove();
             campsite.save()
             .then(campsite => {
